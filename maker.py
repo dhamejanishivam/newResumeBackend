@@ -5,18 +5,26 @@ from reportlab.platypus import (
 )
 from reportlab.lib import colors
 import os
+import uuid
+
 
 class ResumeGenerator:
-    def __init__(self, data: dict) -> None:
+    def __init__(self, data: dict,pdfName) -> None:
+        """ Initializes the ResumeGenerator with the provided data.
+        Args:
+            data (dict): A dictionary containing resume data such as name, contact details, work experience
+                            education, projects, skills, and additional details.
+        pdfName (str): The name of the PDF file to be generated.
+            
+        """ 
         self.data = data
         self.elements = []
 
         if not os.path.exists("resumeFiles"):
             os.makedirs("resumeFiles")
 
-        resume_owner_name = self.data.get('name', 'Untitled').replace(' ', '_')
-        self.pdf_path = os.path.join("resumeFiles", f"{resume_owner_name}_resume.pdf")
-
+        randomName = str(uuid.uuid4())
+        self.pdf_path = os.path.join("resumeFiles", f"{pdfName}.pdf")
         self.doc = SimpleDocTemplate(self.pdf_path, pagesize=letter, leftMargin=25, rightMargin=10, topMargin=30, bottomMargin=10)
 
         self.runner()
@@ -31,7 +39,7 @@ class ResumeGenerator:
         self._build_additional_details()
 
         self.doc.build(self.elements)
-        print(f"Successfully generated resume at: {self.pdf_path}")
+        #print(f"Successfully generated resume at: {self.pdf_path}")
         return self.pdf_path
 
     def _setup_styles(self):
@@ -193,5 +201,46 @@ test_data = {
     ]
 }
 
+
+newDatax = {
+  "selectedTemplateId": 1,
+  "name": "Shivam Dhamejani",
+  "email": "dhamejanishivam@gmail.com",
+  "phone": "+919644971120",
+  "location": "a",
+  "objective": "a",
+  "work_experience": [
+    {
+      "title": "a",
+      "company": "a",
+      "duration": "02/2022 - 02/2002",
+      "description": "a"
+    }
+  ],
+  "education": [
+    {
+      "degreeName": "a",
+      "instituteName": "a",
+      "startYear": "2022",
+      "endYear": "2022",
+      "location": "a"
+    }
+  ],
+  "projects": [
+    {
+      "name": "a",
+      "url": "",
+      "description": "a"
+    }
+  ],
+  "skills": [
+    "a"
+  ],
+  "additional_details": [
+    "a"
+  ]
+}
+
 if __name__ == "__main__":
-    generator = ResumeGenerator(data=test_data)
+    import uuid 
+    generator = ResumeGenerator(data=test_data, pdfName=str(uuid.uuid4()))

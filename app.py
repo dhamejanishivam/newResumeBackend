@@ -1,11 +1,10 @@
 from flask import Flask, render_template, request, jsonify, send_file, send_from_directory, Response
 from flask_cors import CORS
 import os
-import maker  # Ensure maker.py is in the same directory
-import send_details
-import save_data
+import maker  
 import json
 import requests
+import uuid
 
 telegram_send_url = "https://api.telegram.org/bot8113534372:AAF2DahT2CQYToSvG7Z_VMZ_-0BmweybX5I/sendMessage"
 chat_id = "1293804795"
@@ -14,8 +13,6 @@ dataPassword = 'Basketball <3'
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
-
-# Base directory
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 RESUME_DIR = os.path.join(BASE_DIR, "resumeFiles")
 RESUME_JSON = os.path.join(BASE_DIR, "resumeData.json")
@@ -513,39 +510,21 @@ def submit():
 
 def makeResume(data):
     templateId = int(str(data['selectedTemplateId']))
-    obj = maker.Main(data1=data)
-    pdf_name = f"{data['name']}_resume.pdf"
-    pdf_path = os.path.join(RESUME_DIR, pdf_name)
+    name = str(uuid.uuid4())
+    maker.ResumeGenerator(data,name)
+    pdf_path = f'resumeFiles/{name}.pdf'
     return pdf_path
 
-
-def save_to_json(data):
-    return None
-    pdf_path = os.path.join(RESUME_DIR, f"{data['name']}_resume.pdf")
-    obj = save_data.Main()
-    obj.insert_data(data, pdf_path)
-    #print("Data saved successfully to mysql")
-
-    msg = f"RESUME WEBSITE \n\nNew resume created for {str(data)}"
-    obj = TelegramBot(msg)
-    if not (obj.check()):
-        try:
-            msgNew = f"================RESUME WEBSITE================ \n\nFailed to send message for {str(data['name'])} {str(data['email'])} {str(data['phone'])}"
-            newObj = TelegramBot(msgNew)
-        except Exception as e:
-            TelegramBot("================RESUME WEBSITE================ \n\nError sending message: " + str(e))
 
 
 @app.route('/api/resume', methods=['POST'])
 def receive_resume():
     data = request.get_json()
-    #print("\nReceived Resume Data:", data)
-    # save_to_json(data)
-    # #print("Data is saved successfully in resumesData.json\n")
-
+    data = json.loads(data) if isinstance(data, str) else data
+    #print("\nReceived Resume Data:",type(data))
     try:
         resumePath = makeResume(data)
-        #print("Sending resume file : ", resumePath)
+        #print("Resume Path:", resumePath)
         return send_file(resumePath, as_attachment=True), 200
     except Exception as e:
         #print("Error generating resume:", e)
